@@ -41,6 +41,15 @@ android {
         )
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(path = properties.getProperty("KEY_STORE_PATH"))
+            storePassword = properties.getProperty("KEY_STORE_PASSWORD")
+            keyAlias = properties.getProperty("KEY_ALIAS")
+            keyPassword = properties.getProperty("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         debug {
             versionNameSuffix = " - Debug"
@@ -54,6 +63,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -172,4 +183,35 @@ dependencies {
     androidTestImplementation(composeBoM)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+val releaseRootDir = "${rootDir}/app"
+val apkDestDir: String = properties.getProperty("APK_DESTINATION_DIR")
+val obfuscationDestDir: String = properties.getProperty("OBFUSCATION_DESTINATION_DIR")
+
+val versionName = "${android.defaultConfig.versionName}"
+val renamedFileName = "Oskar Demo Project $versionName"
+
+tasks.register<Copy>("copyReleaseApk") {
+    val prodApkFile = "app-release.apk"
+    val prodApkSourceDir = "${releaseRootDir}/release/${prodApkFile}"
+
+    from(prodApkSourceDir)
+    into(apkDestDir)
+
+    rename(
+        /* sourceRegEx = */ prodApkFile,
+        /* replaceWith = */ "$renamedFileName.apk"
+    )
+}
+
+tasks.register<Copy>("copyObfuscationFolder") {
+    val obfuscationSourceDir = "${rootDir}/app/obfuscation"
+
+    from(obfuscationSourceDir)
+    into(obfuscationDestDir)
+}
+
+tasks.register("copyReleaseFiles") {
+    dependsOn("copyReleaseApk", "copyObfuscationFolder")
 }
