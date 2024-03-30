@@ -1,7 +1,7 @@
 package com.xeniac.oskardemoproject.core.di
 
 import com.xeniac.oskardemoproject.core.data.local.PreferencesRepository
-import com.xeniac.oskardemoproject.core.data.local.PreferencesRepositoryImp
+import com.xeniac.oskardemoproject.core.data.local.PreferencesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,6 +15,6 @@ abstract class RepositorySingletonModule {
     @Binds
     @Singleton
     abstract fun bindPreferencesRepository(
-        preferencesRepositoryImp: PreferencesRepositoryImp
+        preferencesRepositoryImpl: PreferencesRepositoryImpl
     ): PreferencesRepository
 }
