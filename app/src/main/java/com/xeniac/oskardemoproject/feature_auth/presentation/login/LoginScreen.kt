@@ -1,15 +1,23 @@
 package com.xeniac.oskardemoproject.feature_auth.presentation.login
 
+import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -23,15 +31,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.xeniac.oskardemoproject.R
+import com.xeniac.oskardemoproject.core.ui.components.CustomOutlinedTextField
 import com.xeniac.oskardemoproject.core.ui.components.LoadingIndicator
 import com.xeniac.oskardemoproject.core.ui.components.NetworkErrorMessage
 import com.xeniac.oskardemoproject.core.ui.components.OfflineErrorMessage
 import com.xeniac.oskardemoproject.feature_auth.presentation.login.components.RegisterBtn
 
+@OptIn(ExperimentalLayoutApi::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
@@ -43,19 +56,25 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val networkErrorState by viewModel.networkErrorState.collectAsStateWithLifecycle()
-    val loginFlowUi by viewModel.loginFlowUi.collectAsStateWithLifecycle()
+    val loginUiNodes by viewModel.loginUiNodes.collectAsStateWithLifecycle()
+    val textFieldsMap by viewModel.textFieldsMap.collectAsStateWithLifecycle()
+    val submitButtonsTitle by viewModel.submitButtonsTitle.collectAsStateWithLifecycle()
+
     val isLoginFlowLoading by viewModel.isLoginFlowLoading.collectAsStateWithLifecycle()
+    val isLoginLoading by viewModel.isLoginLoading.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
-        if (loginFlowUi == null) {
+        if (loginUiNodes.isEmpty()) {
             viewModel.onEvent(LoginEvent.GetLoginFlow)
         }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        modifier = Modifier.fillMaxSize()
-    ) { innerPaddings ->
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBarsIgnoringVisibility)
+    ) { _ ->
         LoadingIndicator(
             isLoading = isLoginFlowLoading,
             modifier = Modifier.fillMaxSize()
@@ -76,15 +95,11 @@ fun LoginScreen(
                     onRetryClick = { viewModel.onEvent(LoginEvent.GetLoginFlow) },
                     modifier = Modifier.fillMaxSize()
                 )
-            } else if (loginFlowUi != null) {
+            } else if (loginUiNodes.isNotEmpty()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            top = innerPaddings.calculateTopPadding(),
-                            bottom = innerPaddings.calculateBottomPadding()
-                        )
                         .windowInsetsPadding(WindowInsets.ime)
                         .verticalScroll(rememberScrollState())
                         .padding(
@@ -92,13 +107,98 @@ fun LoginScreen(
                             vertical = 24.dp
                         )
                 ) {
-                    // TODO:
                     Text(
-                        text = loginFlowUi.toString(),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                        text = "Login",
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(36.dp))
+
+                    textFieldsMap.forEach { (identifier, textFieldState) ->
+                        CustomOutlinedTextField(
+                            isLoading = isLoginLoading,
+                            value = textFieldState.text,
+                            onValueChange = { newValue ->
+                                viewModel.onEvent(
+                                    LoginEvent.TextFieldValueChanged(
+                                        identifier = identifier,
+                                        newValue = newValue
+                                    )
+                                )
+                            },
+                            label = textFieldState.title,
+                            isPasswordTextField = textFieldState.isPassword,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp)) // 16 + 24 = 40.dp
+
+                    Button(
+                        onClick = {
+                            Toast.makeText(
+                                /* context = */ context,
+                                /* text = */ "Clicked",
+                                /* duration = */ Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = submitButtonsTitle)
+                    }
+
+//                    loginUiNodes.forEach { node ->
+//                        if (node.meta?.label != null) {
+//                            if (node.attributes.type == "submit") {
+//                                Button(
+//                                    onClick = {
+//                                        Toast.makeText(
+//                                            /* context = */ context,
+//                                            /* text = */ "Clicked",
+//                                            /* duration = */ Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    },
+//                                    modifier = Modifier.fillMaxWidth()
+//                                ) {
+//                                    Text(text = node.meta.label.text)
+//                                }
+//                            } else {
+//                                var inputValue by remember { mutableStateOf("") }
+//
+//                                CustomOutlinedTextField(
+//                                    isLoading = false,
+//                                    value = inputValue,
+//                                    onValueChange = { inputValue = it },
+//                                    label = node.meta.label.text,
+//                                    isPasswordTextField = node.attributes.type == "password",
+//                                    modifier = Modifier.fillMaxWidth()
+//                                )
+//
+////                                Text(
+////                                    text = "textfield isRequired = ${node.attributes.required}",
+////                                    color = Color.Blue,
+////                                    modifier = Modifier.fillMaxWidth()
+////                                )
+////
+////                                Text(
+////                                    text = "parameter key = ${node.attributes.name}",
+////                                    color = Color.Red,
+////                                    modifier = Modifier.fillMaxWidth()
+////                                )
+//                            }
+//                        }
+//
+//                        Spacer(modifier = Modifier.height(16.dp))
+//                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.weight(1f))
 
                     RegisterBtn(
                         onRegisterClick = onNavigateToRegister,

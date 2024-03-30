@@ -6,7 +6,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CustomTextFieldState(
-    val text: String = "",
+    val title: String? = null,
+    var text: String = "",
+    val isRequired: Boolean = false,
+    val isPassword: Boolean = false,
     val isValid: Boolean = false,
     val isError: Boolean = false,
     val errorText: UiText? = null

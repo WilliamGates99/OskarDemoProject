@@ -1,12 +1,15 @@
 package com.xeniac.oskardemoproject.feature_auth.presentation.register
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsIgnoringVisibility
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -32,6 +35,8 @@ import com.xeniac.oskardemoproject.core.ui.components.NetworkErrorMessage
 import com.xeniac.oskardemoproject.core.ui.components.OfflineErrorMessage
 import com.xeniac.oskardemoproject.feature_auth.presentation.login.components.RegisterBtn
 
+@OptIn(ExperimentalLayoutApi::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun RegisterScreen(
     onNavigateUp: () -> Unit,
@@ -43,19 +48,21 @@ fun RegisterScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val networkErrorState by viewModel.networkErrorState.collectAsStateWithLifecycle()
-    val registrationFlowUi by viewModel.registrationFlowUi.collectAsStateWithLifecycle()
+    val registerUiNodes by viewModel.registerUiNodes.collectAsStateWithLifecycle()
     val isRegistrationFlowLoading by viewModel.isRegistrationFlowLoading.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = Unit) {
-        if (registrationFlowUi == null) {
+        if (registerUiNodes.isEmpty()) {
             viewModel.onEvent(RegisterEvent.GetRegistrationFlow)
         }
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        modifier = Modifier.fillMaxSize()
-    ) { innerPaddings ->
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBarsIgnoringVisibility)
+    ) { _ ->
         LoadingIndicator(
             isLoading = isRegistrationFlowLoading,
             modifier = Modifier.fillMaxSize()
@@ -76,15 +83,11 @@ fun RegisterScreen(
                     onRetryClick = { viewModel.onEvent(RegisterEvent.GetRegistrationFlow) },
                     modifier = Modifier.fillMaxSize()
                 )
-            } else if (registrationFlowUi != null) {
+            } else if (registerUiNodes.isNotEmpty()) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(
-                            top = innerPaddings.calculateTopPadding(),
-                            bottom = innerPaddings.calculateBottomPadding()
-                        )
                         .windowInsetsPadding(WindowInsets.ime)
                         .verticalScroll(rememberScrollState())
                         .padding(
@@ -94,10 +97,8 @@ fun RegisterScreen(
                 ) {
                     // TODO:
                     Text(
-                        text = registrationFlowUi.toString(),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
+                        text = registerUiNodes.toString(),
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     RegisterBtn(

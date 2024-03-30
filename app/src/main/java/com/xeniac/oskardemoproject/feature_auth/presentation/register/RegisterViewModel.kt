@@ -7,7 +7,7 @@ import com.xeniac.oskardemoproject.core.data.local.ConnectivityObserver
 import com.xeniac.oskardemoproject.core.domain.states.NetworkErrorState
 import com.xeniac.oskardemoproject.core.util.NetworkObserverHelper
 import com.xeniac.oskardemoproject.core.util.Resource
-import com.xeniac.oskardemoproject.feature_auth.domain.models.Ui
+import com.xeniac.oskardemoproject.feature_auth.domain.models.Node
 import com.xeniac.oskardemoproject.feature_auth.domain.use_cases.AuthUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,9 +24,9 @@ class RegisterViewModel @Inject constructor(
         initialValue = NetworkErrorState()
     )
 
-    val registrationFlowUi = savedStateHandle.getStateFlow<Ui?>(
-        key = "registrationFlowUi",
-        initialValue = null
+    val registerUiNodes = savedStateHandle.getStateFlow(
+        key = "registerUiNodes",
+        initialValue = emptyList<Node>()
     )
 
     val isRegistrationFlowLoading = savedStateHandle.getStateFlow(
@@ -51,8 +51,8 @@ class RegisterViewModel @Inject constructor(
             savedStateHandle["isRegistrationFlowLoading"] = true
             when (val getRegistrationFlowResult = authUseCases.getRegistrationFlowUseCase.get()()) {
                 is Resource.Success -> {
-                    getRegistrationFlowResult.data?.let { registrationUi ->
-                        savedStateHandle["registrationFlowUi"] = registrationUi
+                    getRegistrationFlowResult.data?.let { registerUiNodes ->
+                        savedStateHandle["registerUiNodes"] = registerUiNodes
                     }
                     savedStateHandle["isRegistrationFlowLoading"] = false
                 }
