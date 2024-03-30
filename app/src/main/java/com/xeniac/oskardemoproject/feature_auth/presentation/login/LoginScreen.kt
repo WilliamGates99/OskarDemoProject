@@ -1,7 +1,6 @@
 package com.xeniac.oskardemoproject.feature_auth.presentation.login
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,8 +16,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -41,7 +42,11 @@ import com.xeniac.oskardemoproject.core.ui.components.CustomOutlinedTextField
 import com.xeniac.oskardemoproject.core.ui.components.LoadingIndicator
 import com.xeniac.oskardemoproject.core.ui.components.NetworkErrorMessage
 import com.xeniac.oskardemoproject.core.ui.components.OfflineErrorMessage
+import com.xeniac.oskardemoproject.core.util.ObserverAsEvent
+import com.xeniac.oskardemoproject.core.util.UiEvent
 import com.xeniac.oskardemoproject.feature_auth.presentation.login.components.RegisterBtn
+import com.xeniac.oskardemoproject.feature_auth.util.AuthUiEvent
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -66,6 +71,23 @@ fun LoginScreen(
     LaunchedEffect(key1 = Unit) {
         if (loginUiNodes.isEmpty()) {
             viewModel.onEvent(LoginEvent.GetLoginFlow)
+        }
+    }
+
+    ObserverAsEvent(flow = viewModel.loginEventChannel) { event ->
+        when (event) {
+            AuthUiEvent.NavigateToHomeScreen -> onNavigateToHomeScreen()
+            is UiEvent.ShowSnackbar -> {
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = event.message.asString(context),
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+            else -> {
+                /* NO-OP */
+            }
         }
     }
 
@@ -142,17 +164,14 @@ fun LoginScreen(
                     Spacer(modifier = Modifier.height(24.dp)) // 16 + 24 = 40.dp
 
                     Button(
-                        onClick = {
-                            // TODO:
-                            Toast.makeText(
-                                /* context = */ context,
-                                /* text = */ "Clicked",
-                                /* duration = */ Toast.LENGTH_SHORT
-                            ).show()
-                        },
+                        onClick = { viewModel.onEvent(LoginEvent.Login) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = submitButtonsTitle)
+                        if (isLoginLoading) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+                        } else {
+                            Text(text = submitButtonsTitle)
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))

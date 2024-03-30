@@ -32,7 +32,7 @@ class LoginViewModel @Inject constructor(
         initialValue = NetworkErrorState()
     )
 
-    val loginFlowId = savedStateHandle.getStateFlow(
+    private val loginFlowId = savedStateHandle.getStateFlow(
         key = "loginFlowId",
         initialValue = ""
     )

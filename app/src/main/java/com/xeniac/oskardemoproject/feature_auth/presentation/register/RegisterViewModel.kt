@@ -32,7 +32,7 @@ class RegisterViewModel @Inject constructor(
         initialValue = NetworkErrorState()
     )
 
-    val registerFlowId = savedStateHandle.getStateFlow(
+    private val registerFlowId = savedStateHandle.getStateFlow(
         key = "registerFlowId",
         initialValue = ""
     )
