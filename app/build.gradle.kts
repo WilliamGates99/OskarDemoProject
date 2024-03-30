@@ -33,6 +33,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField(
+            type = "String",
+            name = "KTOR_HTTP_BASE_URL",
+            value = properties.getProperty("KTOR_HTTP_BASE_URL")
+        )
     }
 
     buildTypes {
@@ -143,13 +149,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose")
     implementation("io.coil-kt:coil-svg")
     implementation("io.coil-kt:coil-gif")
-
-    // Ory client Library
-    implementation("sh.ory:ory-client:1.6.2") {
-        // Exclude Duplicate Classes
-        exclude(group = "org.apache.oltu.oauth2", module = "org.apache.oltu.oauth2.common")
-        exclude(group = "javax.ws.rs", module = "javax.ws.rs-api")
-    }
 
     // Local Unit Test Libraries
     testImplementation("com.google.truth:truth:1.4.2")
