@@ -9,12 +9,12 @@ data class Message(
     val id: Int,
     val text: String,
     val type: String,
-    val context: Context
+    val context: Context?
 ) : Parcelable {
     fun toMessageDto(): MessageDto = MessageDto(
         id = id,
         text = text,
         type = type,
-        contextDto = context.toContextDto()
+        contextDto = context?.toContextDto()
     )
 }

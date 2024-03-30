@@ -13,12 +13,12 @@ data class MessageDto(
     @SerialName("type")
     val type: String,
     @SerialName("context")
-    val contextDto: ContextDto
+    val contextDto: ContextDto? = null
 ) {
     fun toMessage(): Message = Message(
         id = id,
         text = text,
         type = type,
-        context = contextDto.toContext()
+        context = contextDto?.toContext()
     )
 }

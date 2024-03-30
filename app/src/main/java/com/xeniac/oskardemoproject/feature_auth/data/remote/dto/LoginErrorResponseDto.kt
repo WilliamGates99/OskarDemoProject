@@ -17,7 +17,7 @@ data class LoginErrorResponseDto(
     @SerialName("state")
     val state: String,
     @SerialName("active")
-    val active: String,
+    val active: String? = null,
     @SerialName("refresh")
     val refresh: Boolean,
     @SerialName("requested_aal")

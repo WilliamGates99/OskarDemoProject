@@ -11,7 +11,7 @@ data class LoginErrorResponse(
     val ui: Ui,
     val requestUrl: String,
     val state: String,
-    val active: String,
+    val active: String?,
     val refresh: Boolean,
     val requestedAal: String,
     val organizationId: String?,
