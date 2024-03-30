@@ -69,7 +69,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
 
     packaging {
@@ -92,7 +92,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Jetpack Compose
-    val composeBoM = platform("androidx.compose:compose-bom:2024.02.01")
+    val composeBoM = platform("androidx.compose:compose-bom:2024.03.00")
     implementation(composeBoM)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3") // Material Design 3
@@ -109,8 +109,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
     // Dagger - Hilt
-    implementation("com.google.dagger:hilt-android:2.51")
-    ksp("com.google.dagger:hilt-compiler:2.51")
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1")
 
     // Architectural Components
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0") // ViewModel
@@ -160,8 +160,8 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.arch.core:core-testing:2.2.0") // Test Helpers for LiveData
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51")
-    kspAndroidTest("com.google.dagger:hilt-compiler:2.51")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
+    kspAndroidTest("com.google.dagger:hilt-compiler:2.51.1")
 
     // UI Tests
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
