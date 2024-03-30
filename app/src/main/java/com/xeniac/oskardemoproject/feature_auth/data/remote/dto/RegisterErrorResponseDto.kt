@@ -17,7 +17,7 @@ data class RegisterErrorResponseDto(
     @SerialName("state")
     val state: String,
     @SerialName("organization_id")
-    val organizationId: String?,
+    val organizationId: String? = null,
     @SerialName("issued_at")
     val issuedAt: String,
     @SerialName("expires_at")

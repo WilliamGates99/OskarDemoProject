@@ -11,15 +11,15 @@ data class AttributesDto(
     @SerialName("type")
     val type: String,
     @SerialName("value")
-    val value: String?,
+    val value: String? = null,
     @SerialName("required")
-    val required: Boolean?,
+    val required: Boolean? = null,
     @SerialName("disabled")
     val disabled: Boolean,
     @SerialName("node_type")
     val nodeType: String,
     @SerialName("autocomplete")
-    val autocomplete: String?
+    val autocomplete: String? = null
 ) {
     fun toAttributes(): Attributes = Attributes(
         name = name,

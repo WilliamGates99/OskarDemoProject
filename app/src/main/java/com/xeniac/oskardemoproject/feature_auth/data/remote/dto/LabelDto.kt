@@ -13,7 +13,7 @@ data class LabelDto(
     @SerialName("type")
     val type: String,
     @SerialName("context")
-    val contextDto: ContextDto?
+    val contextDto: ContextDto? = null
 ) {
     fun toLabel(): Label = Label(
         id = id,

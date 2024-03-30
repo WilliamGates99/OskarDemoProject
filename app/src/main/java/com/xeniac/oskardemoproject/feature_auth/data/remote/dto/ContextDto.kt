@@ -7,15 +7,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContextDto(
     @SerialName("title")
-    val title: String?,
+    val title: String? = null,
     @SerialName("property")
-    val property: String?,
+    val property: String? = null,
     @SerialName("available_credential_types")
-    val availableCredentialTypes: List<String>?,
+    val availableCredentialTypes: List<String>? = null,
     @SerialName("available_oidc_providers")
-    val availableOidcProviders: String?,
+    val availableOidcProviders: String? = null,
     @SerialName("credential_identifier_hint")
-    val credentialIdentifierHint: String?
+    val credentialIdentifierHint: String? = null
 ) {
     fun toContext(): Context = Context(
         title = title,

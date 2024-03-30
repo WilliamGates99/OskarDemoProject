@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MetaDto(
     @SerialName("label")
-    val labelDto: LabelDto?
+    val labelDto: LabelDto? = null
 ) {
     fun toMeta(): Meta = Meta(
         label = labelDto?.toLabel()

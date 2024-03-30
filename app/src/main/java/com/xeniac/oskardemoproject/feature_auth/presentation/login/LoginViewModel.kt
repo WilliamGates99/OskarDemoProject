@@ -31,7 +31,7 @@ class LoginViewModel @Inject constructor(
 
     val isLoginFlowLoading = savedStateHandle.getStateFlow(
         key = "isLoginFlowLoading",
-        initialValue = false
+        initialValue = true
     )
 
     fun onEvent(event: LoginEvent) {

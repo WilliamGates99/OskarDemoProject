@@ -31,7 +31,7 @@ class RegisterViewModel @Inject constructor(
 
     val isRegistrationFlowLoading = savedStateHandle.getStateFlow(
         key = "isRegistrationFlowLoading",
-        initialValue = false
+        initialValue = true
     )
 
     fun onEvent(event: RegisterEvent) {

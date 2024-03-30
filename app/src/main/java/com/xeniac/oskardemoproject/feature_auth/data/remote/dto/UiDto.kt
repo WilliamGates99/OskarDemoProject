@@ -13,7 +13,7 @@ data class UiDto(
     @SerialName("nodes")
     val nodeDtos: List<NodeDto>,
     @SerialName("messages")
-    val messageDtos: List<MessageDto>?
+    val messageDtos: List<MessageDto>? = null
 ) {
     fun toUi(): Ui = Ui(
         actionUrl = actionUrl,

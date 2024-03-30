@@ -21,7 +21,7 @@ data class GetLoginFlowResponseDto(
     @SerialName("requested_aal")
     val requestedAal: String,
     @SerialName("organization_id")
-    val organizationId: String?,
+    val organizationId: String? = null,
     @SerialName("issued_at")
     val issuedAt: String,
     @SerialName("expires_at")

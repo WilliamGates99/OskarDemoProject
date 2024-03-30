@@ -9,9 +9,9 @@ data class ContinueWithDto(
     @SerialName("action")
     val action: String,
     @SerialName("flow")
-    val flowDto: FlowDto?,
+    val flowDto: FlowDto? = null,
     @SerialName("ory_session_token")
-    val orySessionToken: String?
+    val orySessionToken: String? = null
 ) {
     fun toContinueWith(): ContinueWith = ContinueWith(
         action = action,
