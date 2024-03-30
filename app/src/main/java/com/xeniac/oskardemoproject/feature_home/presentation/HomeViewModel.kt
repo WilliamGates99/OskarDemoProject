@@ -40,7 +40,16 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getUserToken() = viewModelScope.launch {
-        savedStateHandle["userToken"] = homeUseCases.getUserTokenUseCase.get()()
+        when (val getUserTokenResult = homeUseCases.getUserTokenUseCase.get()()) {
+            is Resource.Success -> {
+                getUserTokenResult.data?.let { userToken ->
+                    savedStateHandle["userToken"] = userToken
+                }
+            }
+            is Resource.Error -> {
+                /* NO-OP */
+            }
+        }
     }
 
     private fun logout() = viewModelScope.launch {
