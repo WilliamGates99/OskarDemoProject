@@ -3,14 +3,21 @@ package com.xeniac.oskardemoproject.feature_auth.presentation.register
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.xeniac.oskardemoproject.R
 import com.xeniac.oskardemoproject.core.data.local.ConnectivityObserver
 import com.xeniac.oskardemoproject.core.domain.states.CustomTextFieldState
 import com.xeniac.oskardemoproject.core.domain.states.NetworkErrorState
+import com.xeniac.oskardemoproject.core.util.Event
 import com.xeniac.oskardemoproject.core.util.NetworkObserverHelper
 import com.xeniac.oskardemoproject.core.util.Resource
+import com.xeniac.oskardemoproject.core.util.UiEvent
+import com.xeniac.oskardemoproject.core.util.UiText
 import com.xeniac.oskardemoproject.feature_auth.domain.models.Node
 import com.xeniac.oskardemoproject.feature_auth.domain.use_cases.AuthUseCases
+import com.xeniac.oskardemoproject.feature_auth.util.AuthUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +30,11 @@ class RegisterViewModel @Inject constructor(
     val networkErrorState = savedStateHandle.getStateFlow(
         key = "networkErrorState",
         initialValue = NetworkErrorState()
+    )
+
+    val registerFlowId = savedStateHandle.getStateFlow(
+        key = "registerFlowId",
+        initialValue = ""
     )
 
     val registerUiNodes = savedStateHandle.getStateFlow(
@@ -50,6 +62,9 @@ class RegisterViewModel @Inject constructor(
         initialValue = false
     )
 
+    private val _registerEventChannel = Channel<Event>()
+    val registerEventChannel = _registerEventChannel.receiveAsFlow()
+
     fun onEvent(event: RegisterEvent) {
         resetNetworkErrorState()
 
@@ -65,6 +80,7 @@ class RegisterViewModel @Inject constructor(
                 }
             }
             RegisterEvent.GetRegistrationFlow -> getRegistrationFlow()
+            RegisterEvent.Register -> register()
         }
     }
 
@@ -77,10 +93,11 @@ class RegisterViewModel @Inject constructor(
             savedStateHandle["isRegistrationFlowLoading"] = true
             when (val getRegistrationFlowResult = authUseCases.getRegistrationFlowUseCase.get()()) {
                 is Resource.Success -> {
-                    getRegistrationFlowResult.data?.let { registerUiNodes ->
-                        savedStateHandle["registerUiNodes"] = registerUiNodes
+                    getRegistrationFlowResult.data?.let { getRegistrationFlowResponse ->
+                        savedStateHandle["registerFlowId"] = getRegistrationFlowResponse.id
+                        savedStateHandle["registerUiNodes"] = getRegistrationFlowResponse.ui.nodes
 
-                        registerUiNodes.forEach { node ->
+                        getRegistrationFlowResponse.ui.nodes.forEach { node ->
                             if (node.meta?.label != null) {
                                 if (node.attributes.type == "submit") {
                                     savedStateHandle["submitButtonsTitle"] = node.meta.label.text
@@ -112,6 +129,36 @@ class RegisterViewModel @Inject constructor(
         } else {
             savedStateHandle["networkErrorState"] = networkErrorState.value.copy(
                 isOfflineErrorVisible = true
+            )
+        }
+    }
+
+    private fun register() = viewModelScope.launch {
+        if (NetworkObserverHelper.networkStatus == ConnectivityObserver.Status.AVAILABLE) {
+            savedStateHandle["isRegisterLoading"] = true
+
+            val submitRegistrationResult = authUseCases.submitRegistrationUseCase.get()(
+                flowId = registerFlowId.value,
+                textFieldsMap = textFieldsMap.value
+            )
+
+            when (submitRegistrationResult) {
+                is Resource.Success -> {
+                    savedStateHandle["isRegisterLoading"] = false
+                    _registerEventChannel.send(AuthUiEvent.NavigateToHomeScreen)
+                }
+                is Resource.Error -> {
+                    submitRegistrationResult.message?.let { message ->
+                        _registerEventChannel.send(UiEvent.ShowSnackbar(message))
+                    }
+                    savedStateHandle["isRegisterLoading"] = false
+                }
+            }
+        } else {
+            _registerEventChannel.send(
+                UiEvent.ShowSnackbar(
+                    UiText.StringResource(R.string.error_network_connection_unavailable)
+                )
             )
         }
     }

@@ -7,4 +7,5 @@ sealed class RegisterEvent {
     ) : RegisterEvent()
 
     data object GetRegistrationFlow : RegisterEvent()
+    data object Register : RegisterEvent()
 }

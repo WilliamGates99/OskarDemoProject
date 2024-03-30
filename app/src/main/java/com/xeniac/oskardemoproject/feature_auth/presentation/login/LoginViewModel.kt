@@ -3,14 +3,21 @@ package com.xeniac.oskardemoproject.feature_auth.presentation.login
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.xeniac.oskardemoproject.R
 import com.xeniac.oskardemoproject.core.data.local.ConnectivityObserver
 import com.xeniac.oskardemoproject.core.domain.states.CustomTextFieldState
 import com.xeniac.oskardemoproject.core.domain.states.NetworkErrorState
+import com.xeniac.oskardemoproject.core.util.Event
 import com.xeniac.oskardemoproject.core.util.NetworkObserverHelper
 import com.xeniac.oskardemoproject.core.util.Resource
+import com.xeniac.oskardemoproject.core.util.UiEvent
+import com.xeniac.oskardemoproject.core.util.UiText
 import com.xeniac.oskardemoproject.feature_auth.domain.models.Node
 import com.xeniac.oskardemoproject.feature_auth.domain.use_cases.AuthUseCases
+import com.xeniac.oskardemoproject.feature_auth.util.AuthUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +30,11 @@ class LoginViewModel @Inject constructor(
     val networkErrorState = savedStateHandle.getStateFlow(
         key = "networkErrorState",
         initialValue = NetworkErrorState()
+    )
+
+    val loginFlowId = savedStateHandle.getStateFlow(
+        key = "loginFlowId",
+        initialValue = ""
     )
 
     val loginUiNodes = savedStateHandle.getStateFlow(
@@ -50,6 +62,9 @@ class LoginViewModel @Inject constructor(
         initialValue = false
     )
 
+    private val _loginEventChannel = Channel<Event>()
+    val loginEventChannel = _loginEventChannel.receiveAsFlow()
+
     fun onEvent(event: LoginEvent) {
         resetNetworkErrorState()
 
@@ -65,6 +80,7 @@ class LoginViewModel @Inject constructor(
                 }
             }
             LoginEvent.GetLoginFlow -> getLoginFlow()
+            LoginEvent.Login -> login()
         }
     }
 
@@ -77,10 +93,11 @@ class LoginViewModel @Inject constructor(
             savedStateHandle["isLoginFlowLoading"] = true
             when (val getLoginFlowResult = authUseCases.getLoginFlowUseCase.get()()) {
                 is Resource.Success -> {
-                    getLoginFlowResult.data?.let { loginUiNodes ->
-                        savedStateHandle["loginUiNodes"] = loginUiNodes
+                    getLoginFlowResult.data?.let { getLoginFlowResponse ->
+                        savedStateHandle["loginFlowId"] = getLoginFlowResponse.id
+                        savedStateHandle["loginUiNodes"] = getLoginFlowResponse.ui.nodes
 
-                        loginUiNodes.forEach { node ->
+                        getLoginFlowResponse.ui.nodes.forEach { node ->
                             if (node.meta?.label != null) {
                                 if (node.attributes.type == "submit") {
                                     savedStateHandle["submitButtonsTitle"] = node.meta.label.text
@@ -112,6 +129,36 @@ class LoginViewModel @Inject constructor(
         } else {
             savedStateHandle["networkErrorState"] = networkErrorState.value.copy(
                 isOfflineErrorVisible = true
+            )
+        }
+    }
+
+    private fun login() = viewModelScope.launch {
+        if (NetworkObserverHelper.networkStatus == ConnectivityObserver.Status.AVAILABLE) {
+            savedStateHandle["isLoginLoading"] = true
+
+            val submitLoginResult = authUseCases.submitLoginUseCase.get()(
+                flowId = loginFlowId.value,
+                textFieldsMap = textFieldsMap.value
+            )
+
+            when (submitLoginResult) {
+                is Resource.Success -> {
+                    savedStateHandle["isLoginLoading"] = false
+                    _loginEventChannel.send(AuthUiEvent.NavigateToHomeScreen)
+                }
+                is Resource.Error -> {
+                    submitLoginResult.message?.let { message ->
+                        _loginEventChannel.send(UiEvent.ShowSnackbar(message))
+                    }
+                    savedStateHandle["isLoginLoading"] = false
+                }
+            }
+        } else {
+            _loginEventChannel.send(
+                UiEvent.ShowSnackbar(
+                    UiText.StringResource(R.string.error_network_connection_unavailable)
+                )
             )
         }
     }

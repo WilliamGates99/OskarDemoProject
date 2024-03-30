@@ -4,5 +4,7 @@ import dagger.Lazy
 
 data class AuthUseCases(
     val getLoginFlowUseCase: Lazy<GetLoginFlowUseCase>,
-    val getRegistrationFlowUseCase: Lazy<GetRegistrationFlowUseCase>
+    val getRegistrationFlowUseCase: Lazy<GetRegistrationFlowUseCase>,
+    val submitLoginUseCase: Lazy<SubmitLoginUseCase>,
+    val submitRegistrationUseCase: Lazy<SubmitRegistrationUseCase>
 )

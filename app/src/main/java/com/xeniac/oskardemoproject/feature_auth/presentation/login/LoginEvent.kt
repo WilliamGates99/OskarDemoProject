@@ -7,4 +7,5 @@ sealed class LoginEvent {
     ) : LoginEvent()
 
     data object GetLoginFlow : LoginEvent()
+    data object Login : LoginEvent()
 }
