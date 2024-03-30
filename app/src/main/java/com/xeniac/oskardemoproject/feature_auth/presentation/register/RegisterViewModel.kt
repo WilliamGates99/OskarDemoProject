@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.xeniac.oskardemoproject.core.data.local.ConnectivityObserver
+import com.xeniac.oskardemoproject.core.domain.states.CustomTextFieldState
 import com.xeniac.oskardemoproject.core.domain.states.NetworkErrorState
 import com.xeniac.oskardemoproject.core.util.NetworkObserverHelper
 import com.xeniac.oskardemoproject.core.util.Resource
@@ -29,15 +30,40 @@ class RegisterViewModel @Inject constructor(
         initialValue = emptyList<Node>()
     )
 
+    val textFieldsMap = savedStateHandle.getStateFlow(
+        key = "textFieldsMap",
+        initialValue = emptyMap<String, CustomTextFieldState>()
+    )
+
+    val submitButtonsTitle = savedStateHandle.getStateFlow(
+        key = "submitButtonsTitle",
+        initialValue = ""
+    )
+
     val isRegistrationFlowLoading = savedStateHandle.getStateFlow(
         key = "isRegistrationFlowLoading",
         initialValue = true
+    )
+
+    val isRegisterLoading = savedStateHandle.getStateFlow(
+        key = "isRegisterLoading",
+        initialValue = false
     )
 
     fun onEvent(event: RegisterEvent) {
         resetNetworkErrorState()
 
         when (event) {
+            is RegisterEvent.TextFieldValueChanged -> {
+                savedStateHandle["textFieldsMap"] = textFieldsMap.value.toMutableMap().apply {
+                    replace(
+                        /* key = */ event.identifier,
+                        /* value = */ get(event.identifier)?.copy(
+                            text = event.newValue
+                        ) ?: CustomTextFieldState()
+                    )
+                }
+            }
             RegisterEvent.GetRegistrationFlow -> getRegistrationFlow()
         }
     }
@@ -53,6 +79,23 @@ class RegisterViewModel @Inject constructor(
                 is Resource.Success -> {
                     getRegistrationFlowResult.data?.let { registerUiNodes ->
                         savedStateHandle["registerUiNodes"] = registerUiNodes
+
+                        registerUiNodes.forEach { node ->
+                            if (node.meta?.label != null) {
+                                if (node.attributes.type == "submit") {
+                                    savedStateHandle["submitButtonsTitle"] = node.meta.label.text
+                                } else {
+                                    addTextField(
+                                        identifier = node.attributes.name,
+                                        textFieldState = CustomTextFieldState(
+                                            title = node.meta.label.text,
+                                            isRequired = node.attributes.required == true,
+                                            isPassword = node.attributes.type == "password"
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
                     savedStateHandle["isRegistrationFlowLoading"] = false
                 }
@@ -69,6 +112,18 @@ class RegisterViewModel @Inject constructor(
         } else {
             savedStateHandle["networkErrorState"] = networkErrorState.value.copy(
                 isOfflineErrorVisible = true
+            )
+        }
+    }
+
+    private fun addTextField(
+        identifier: String,
+        textFieldState: CustomTextFieldState
+    ) = viewModelScope.launch {
+        savedStateHandle["textFieldsMap"] = textFieldsMap.value.toMutableMap().apply {
+            put(
+                key = identifier,
+                value = textFieldState
             )
         }
     }

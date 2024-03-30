@@ -142,6 +142,7 @@ fun LoginScreen(
 
                     Button(
                         onClick = {
+                            // TODO:
                             Toast.makeText(
                                 /* context = */ context,
                                 /* text = */ "Clicked",
@@ -152,50 +153,6 @@ fun LoginScreen(
                     ) {
                         Text(text = submitButtonsTitle)
                     }
-
-//                    loginUiNodes.forEach { node ->
-//                        if (node.meta?.label != null) {
-//                            if (node.attributes.type == "submit") {
-//                                Button(
-//                                    onClick = {
-//                                        Toast.makeText(
-//                                            /* context = */ context,
-//                                            /* text = */ "Clicked",
-//                                            /* duration = */ Toast.LENGTH_SHORT
-//                                        ).show()
-//                                    },
-//                                    modifier = Modifier.fillMaxWidth()
-//                                ) {
-//                                    Text(text = node.meta.label.text)
-//                                }
-//                            } else {
-//                                var inputValue by remember { mutableStateOf("") }
-//
-//                                CustomOutlinedTextField(
-//                                    isLoading = false,
-//                                    value = inputValue,
-//                                    onValueChange = { inputValue = it },
-//                                    label = node.meta.label.text,
-//                                    isPasswordTextField = node.attributes.type == "password",
-//                                    modifier = Modifier.fillMaxWidth()
-//                                )
-//
-////                                Text(
-////                                    text = "textfield isRequired = ${node.attributes.required}",
-////                                    color = Color.Blue,
-////                                    modifier = Modifier.fillMaxWidth()
-////                                )
-////
-////                                Text(
-////                                    text = "parameter key = ${node.attributes.name}",
-////                                    color = Color.Red,
-////                                    modifier = Modifier.fillMaxWidth()
-////                                )
-//                            }
-//                        }
-//
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                    }
 
                     Spacer(modifier = Modifier.height(20.dp))
                     Spacer(modifier = Modifier.weight(1f))
