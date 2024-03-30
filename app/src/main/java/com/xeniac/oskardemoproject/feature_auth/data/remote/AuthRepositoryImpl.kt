@@ -82,11 +82,17 @@ class AuthRepositoryImpl @Inject constructor(
 
             parameter("flow", flowId)
 
-            var requestBody = "{\"csrf_token\": \"\", \"method\": \"password\",\n"
-            textFieldsMap.forEach { (identifier, textFieldState) ->
-                requestBody += "\"$identifier\": \"${textFieldState.text}\",\n"
+            var textFieldsBody = ""
+            textFieldsMap.onEachIndexed { index, entry ->
+                val isLastItem = index == textFieldsMap.size - 1
+                textFieldsBody += if (isLastItem) {
+                    "\"${entry.key}\": \"${entry.value.text}\""
+                } else {
+                    "\"${entry.key}\": \"${entry.value.text}\",\n"
+                }
             }
-            requestBody += "}"
+
+            val requestBody = "{\"csrf_token\": \"\", \"method\": \"password\", $textFieldsBody}"
 
             val jsonRequestBody = Json.parseToJsonElement(requestBody)
             setBody(
@@ -201,22 +207,33 @@ class AuthRepositoryImpl @Inject constructor(
 
             parameter("flow", flowId)
 
-            var requestBody = "{\"csrf_token\": \"\", \"method\": \"password\",\n"
-
+            var textFieldsBody = ""
             val traitsPrefix = "traits."
-            textFieldsMap.forEach { (identifier, textFieldState) ->
-                if (!identifier.contains(traitsPrefix)) {
-                    requestBody += "\"$identifier\": \"${textFieldState.text}\",\n"
+            textFieldsMap.onEachIndexed { index, entry ->
+                val isLastItem = index == textFieldsMap.size - 1
+                if (!entry.key.contains(traitsPrefix)) {
+                    textFieldsBody += if (isLastItem) {
+                        "\"${entry.key}\": \"${entry.value.text}\""
+                    } else {
+                        "\"${entry.key}\": \"${entry.value.text}\",\n"
+                    }
                 }
             }
 
-            requestBody += "\"traits\": {\n"
-            textFieldsMap.forEach { (identifier, textFieldState) ->
-                if (identifier.contains(traitsPrefix)) {
-                    requestBody += "\"${identifier.removePrefix(traitsPrefix)}\": \"${textFieldState.text}\",\n"
+            var traitsTextFieldsBody = "\"traits\": {\n"
+            textFieldsMap.onEachIndexed { index, entry ->
+                val isLastItem = index == textFieldsMap.size - 1
+                if (entry.key.contains(traitsPrefix)) {
+                    traitsTextFieldsBody += if (isLastItem) {
+                        "\"${entry.key.removePrefix(traitsPrefix)}\": \"${entry.value.text}\"}"
+                    } else {
+                        "\"${entry.key.removePrefix(traitsPrefix)}\": \"${entry.value.text}\",\n"
+                    }
                 }
             }
-            requestBody += "}}"
+
+            val requestBody = "{\"csrf_token\": \"\", \"method\": \"password\", " +
+                "$textFieldsBody, $traitsTextFieldsBody}"
 
             val jsonRequestBody = Json.parseToJsonElement(requestBody)
             setBody(
