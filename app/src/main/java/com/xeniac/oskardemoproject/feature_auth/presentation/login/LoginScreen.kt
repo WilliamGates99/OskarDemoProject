@@ -132,6 +132,7 @@ fun LoginScreen(
                             },
                             label = textFieldState.title,
                             isPasswordTextField = textFieldState.isPassword,
+                            supportingText = if (!textFieldState.isRequired) "Optional" else null,
                             modifier = Modifier.fillMaxWidth()
                         )
 

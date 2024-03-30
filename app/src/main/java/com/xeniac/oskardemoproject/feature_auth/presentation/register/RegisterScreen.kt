@@ -108,7 +108,7 @@ fun RegisterScreen(
                         )
                 ) {
                     Text(
-                        text = "Login",
+                        text = "Register",
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
@@ -132,6 +132,7 @@ fun RegisterScreen(
                             },
                             label = textFieldState.title,
                             isPasswordTextField = textFieldState.isPassword,
+                            supportingText = if (!textFieldState.isRequired) "Optional" else null,
                             modifier = Modifier.fillMaxWidth()
                         )
 
