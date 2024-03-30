@@ -207,22 +207,22 @@ class AuthRepositoryImpl @Inject constructor(
 
             parameter("flow", flowId)
 
-            var textFieldsBody = ""
             val traitsPrefix = "traits."
-            textFieldsMap.onEachIndexed { index, entry ->
-                val isLastItem = index == textFieldsMap.size - 1
-                if (!entry.key.contains(traitsPrefix)) {
-                    textFieldsBody += if (isLastItem) {
-                        "\"${entry.key}\": \"${entry.value.text}\""
-                    } else {
-                        "\"${entry.key}\": \"${entry.value.text}\",\n"
-                    }
+            var textFieldsBody = ""
+            val nonTraitsTextFieldsMap = textFieldsMap.filter { !it.key.contains(traitsPrefix) }
+            nonTraitsTextFieldsMap.onEachIndexed { index, entry ->
+                val isLastItem = index == nonTraitsTextFieldsMap.size - 1
+                textFieldsBody += if (isLastItem) {
+                    "\"${entry.key}\": \"${entry.value.text}\""
+                } else {
+                    "\"${entry.key}\": \"${entry.value.text}\",\n"
                 }
             }
 
             var traitsTextFieldsBody = "\"traits\": {\n"
-            textFieldsMap.onEachIndexed { index, entry ->
-                val isLastItem = index == textFieldsMap.size - 1
+            val traitsTextFieldsMap = textFieldsMap.filter { it.key.contains(traitsPrefix) }
+            traitsTextFieldsMap.onEachIndexed { index, entry ->
+                val isLastItem = index == traitsTextFieldsMap.size - 1
                 if (entry.key.contains(traitsPrefix)) {
                     traitsTextFieldsBody += if (isLastItem) {
                         "\"${entry.key.removePrefix(traitsPrefix)}\": \"${entry.value.text}\"}"
