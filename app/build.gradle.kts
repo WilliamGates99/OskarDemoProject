@@ -122,11 +122,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
 
     // Ktor Client Library
-    implementation("io.ktor:ktor-client-core:2.3.9")
-    implementation("io.ktor:ktor-client-okhttp:2.3.9") // Ktor OkHttp Engine
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.9")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.9")
-    implementation("io.ktor:ktor-client-logging:2.3.9")
+    val ktorVersion = "2.3.9"
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-okhttp:$ktorVersion") // Ktor OkHttp Engine
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
     // Kotlin JSON Serialization Library
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
@@ -144,7 +145,11 @@ dependencies {
     implementation("io.coil-kt:coil-gif")
 
     // Ory client Library
-    implementation("sh.ory:ory-client:1.6.2")
+    implementation("sh.ory:ory-client:1.6.2") {
+        // Exclude Duplicate Classes
+        exclude(group = "org.apache.oltu.oauth2", module = "org.apache.oltu.oauth2.common")
+        exclude(group = "javax.ws.rs", module = "javax.ws.rs-api")
+    }
 
     // Local Unit Test Libraries
     testImplementation("com.google.truth:truth:1.4.2")
